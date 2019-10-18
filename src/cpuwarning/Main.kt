@@ -72,7 +72,7 @@ fun main() {
 			
 			// 警戒状态, 要么在达到底线时发送警报, 要么确认安全后解除警戒
 			if (warning) {
-				println("第 $i\t次采样 CPU:\t${ cpucount }\tMem:\t${ memcount }")
+				println("采样 $i \tCPU: ${ cpucount }\tMem: ${ memcount }")
 				cpuUsage += cpucount
 				i ++
 				val crt = System.currentTimeMillis() // 采样时间
@@ -88,6 +88,7 @@ fun main() {
 							// 发送邮件
 							println("发送邮件 -- (${ Date() })")
 							lastSendMailTime = crt
+							sender.sendWarning("dest@example.com", "CPU超负荷警告", "服务器CPU严重超载($avg%), 请管理员立即处理.\n$output\nFROM CPUWarning.")
 						} else {
 							println("距离上一次发送时间 ${ crt - lastSendMailTime }, 不发送邮件")
 						}
