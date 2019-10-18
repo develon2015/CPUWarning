@@ -1,10 +1,10 @@
 .ONESHELL:
 SHELL := /bin/bash
-Target := bin/MainKt.class
+Target := bin/cpuwarning/MainKt.class
 Proxy := makefile_proxy
 KC := kc
 JK := jk
-CP := -cp bin -cp '*/*/ref/*.jar'
+CP := -cp bin -cp '*/*.jar'
 
 
 .PHONY: all
@@ -27,7 +27,7 @@ bin:
 
 .PHONY: run
 run:
-	sudo $(JK) $(CP) MainKt
+	$(JK) $(CP) cpuwarning.MainKt
 
 .PHONY:test 
 test:
