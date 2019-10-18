@@ -62,7 +62,7 @@ fun main() {
 			// CPU异常, 如果没有戒备则进入警戒
 			if (cpucount > 80.0) {
 				if (!warning) { // 进入警戒模式, 记录时间点
-					println("CPU $cpucount %, 进入警戒状态 (${ Date() })")
+					println("CPU $cpucount %, 进入警戒状态 -- (${ Date() })")
 					warning = true
 					i = 0
 					cpuUsage = 0.0
@@ -72,24 +72,37 @@ fun main() {
 			
 			// 警戒状态, 要么在达到底线时发送警报, 要么确认安全后解除警戒
 			if (warning) {
-				println("第\t$i 次采样 CPU:\t${ cpucount }\tMem:\t${ memcount }")
+				println("第 $i\t次采样 CPU:\t${ cpucount }\tMem:\t${ memcount }")
 				cpuUsage += cpucount
 				i ++
-				val crt = System.currentTimeMillis()
+				val crt = System.currentTimeMillis() // 采样时间
 				if (crt - time > 2 * 60 * 1000) {
 					// 评估2 min的 CPU 平均值
 					val avg = cpuUsage / i
 					println("CPU平均使用率为 $avg %")
 					if (avg > 80.0) {
-						println("CPU 超载 (${ cpucount }%), 发送警报邮件 (${ Date() })")
-						lastSendMailTime = System.currentTimeMillis()
+						println("CPU 超载 (${ cpucount }%), 检查上一次警告时间以确认本次是否发送警报邮件")
+						// 发送邮件后警报并不会解除, 所以需要设定一个时间段, 避免邮件轰炸
+						// 由于解除警报最少需要2 min, 所以设置为4 min
+						if (crt - lastSendMailTime > 4 * 60 * 1000) {
+							// 发送邮件
+							println("发送邮件 -- (${ Date() })")
+							lastSendMailTime = crt
+						} else {
+							println("距离上一次发送时间 ${ crt - lastSendMailTime }, 不发送邮件")
+						}
 					} else {
-						println("警报解除")
+						println("警报解除 -- (${ Date() })")
 						warning = false
 					}
+					// 评估结束后清空采样数据, 便于快速解除警报
+					// 注意更新警戒时间, 避免采样不足就评估造成警报误解(当然, 这不过最多让CPU再猖獗几个party时间
+					time = crt
+					cpuUsage = 0.0
+					i = 0
 				}
 			} else {
-				println("安全状态\n $output")
+				println("当前处于安全状态(CPU $cpucount %) -- (${ Date() })\n $output")
 			}
 			
 			// 休眠是必须的, 无论是否警戒状态, 不过警戒状态下没那么多party时间
