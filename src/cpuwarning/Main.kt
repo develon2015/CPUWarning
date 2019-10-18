@@ -29,12 +29,12 @@ fun main() {
 	13785 root      20   0   23056    212      0 S   6.7  0.0   1:41.94 qemu-ga
 */
 	
-	val partyTime = 20000L // 非警戒状态的休闲时间/ms
+	val partyTime = 2000L // 非警戒状态的休闲时间/ms
 	val warningTime = 200L // 警戒状态的取样时间
 	var warning = false // 警戒状态?
 	var time = 0L // 进入警戒状态的时间点
 	var i = 0L // 采样次数
-	var cpuUsage = 0L // CPU累积
+	var cpuUsage = 0.0 // CPU累积
 	
 	var lastSendMailTime = 0L
 
@@ -48,15 +48,15 @@ fun main() {
 //			println(output)
 			val regex = """^.*\s+(\d+\.\d+)\s+(\d+.\d+)\s+.*$""".toRegex()
 			// 匹配输出
-			var cpucount = 0
-			var memcount = 0
+			var cpucount = 0.0
+			var memcount = 0.0
 			for (line in output.split('\n')) {
 				val mr = regex.matchEntire(line)
 				if (mr == null) continue
 				val (cpu, mem) = mr.destructured
-				println("$cpu $mem")
-				cpucount += cpu.toInt()
-				memcount += mem.toInt()
+//				println("$cpu $mem")
+				cpucount += cpu.toDouble()
+				memcount += mem.toDouble()
 			}
 			
 			// CPU异常, 如果没有戒备则进入警戒
@@ -65,13 +65,14 @@ fun main() {
 					println("CPU $cpucount %, 进入警戒状态 (${ Date() })")
 					warning = true
 					i = 0
-					cpuUsage = 0
+					cpuUsage = 0.0
 					time = System.currentTimeMillis()
 				}
 			}
 			
 			// 警戒状态, 要么在达到底线时发送警报, 要么确认安全后解除警戒
 			if (warning) {
+				println("第\t$i 次采样 CPU:\t${ cpucount }\tMem:\t${ memcount }")
 				cpuUsage += cpucount
 				i ++
 				val crt = System.currentTimeMillis()
@@ -87,6 +88,8 @@ fun main() {
 						warning = false
 					}
 				}
+			} else {
+				println("安全状态\n $output")
 			}
 			
 			// 休眠是必须的, 无论是否警戒状态, 不过警戒状态下没那么多party时间
