@@ -66,9 +66,9 @@ class Shell(val shell: String = "bash") {
 		return "SHELL".equals(run("echo -n 'SHELL'"))
 	}
 	
-	/** 获取上一个命令退出码 */
+	/** 获取上一个命令退出码, 毋使惊异常(-1) */
 	fun lastCode(): Int = try { run("echo -n $?", 100, 0)?.toInt() ?: -1 } catch (e: Throwable){ -1 }
 	
-	/** 发送 exit 指令 */
+	/** 发送 exit 指令, 毋使惊异常 */
 	fun exit() = try { run("exit") } catch(e: Throwable) {}
 }
