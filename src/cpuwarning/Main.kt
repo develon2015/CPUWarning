@@ -2,12 +2,17 @@ package cpuwarning
 
 import lib.process.Shell
 import java.util.Date
+import java.io.File
 
 fun main() {
 	val sender = MailSender("zhangsan@develon.club", "pawd")
 	val sh = Shell()
 	val cmd = """top -bi -n 1"""
 	sh.ready()
+
+	var logDir = File("./logs") // 日志目录, 记录触发警报的场景
+	if (!logDir.exists()) logDir.mkdirs()
+	if (!logDir.isDirectory()) logDir = File(".") // 如果无法创建目录logs, 那么不如把日志写到当前目录下
 
 	if (sh.isAlive()) {
 		sh.run(cmd)
@@ -62,11 +67,13 @@ fun main() {
 			// CPU异常, 如果没有戒备则进入警戒
 			if (cpucount > 80.0) {
 				if (!warning) { // 进入警戒模式, 记录时间点
-					println("CPU $cpucount %, 进入警戒状态 -- (${ Date() })")
+					println("CPU $cpucount %, 进入警戒状态 -- (${ Date() })\n$output")
 					warning = true
 					i = 0
 					cpuUsage = 0.0
 					time = System.currentTimeMillis()
+					// 记录触发场景
+					sh.run("echo '${ output.replace("'", "''") }' >> ${ logDir.getAbsolutePath() }/cpuwarning.\$(date +%Y-%m-%d).log")
 				}
 			}
 			
@@ -103,7 +110,7 @@ fun main() {
 					i = 0
 				}
 			} else {
-				println("当前处于安全状态(CPU $cpucount %) -- (${ Date() })\n $output")
+				println("当前处于安全状态(CPU $cpucount %) -- (${ Date() })\n$output")
 			}
 			
 			// 休眠是必须的, 无论是否警戒状态, 不过警戒状态下没那么多party时间
