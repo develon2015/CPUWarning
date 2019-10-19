@@ -62,13 +62,13 @@ class Shell(val shell: String = "bash") {
 	}
 	
 	/** 测试 Shell 可用性 */
-	fun isAlive(): Boolean {
-		return "SHELL".equals(run("echo -n 'SHELL'"))
-	}
+	fun isAlive(): Boolean = try { "SHELL".equals(run("echo -n 'SHELL'")) } catch(e: Throwable) { false }
 	
 	/** 获取上一个命令退出码, 毋使惊异常(-1) */
-	fun lastCode(): Int = try { run("echo -n $?", 100, 0)?.toInt() ?: -1 } catch (e: Throwable){ -1 }
+	fun lastCode(): Int = try { run("echo -n $?", 100, 0)?.toInt() ?: -1 } catch(e: Throwable) { -1 }
 	
 	/** 发送 exit 指令, 毋使惊异常 */
-	fun exit() = try { run("exit") } catch(e: Throwable) {}
+	fun exit() {
+		try { run("exit") } catch(e: Throwable) {}
+	}
 }
