@@ -14,19 +14,13 @@ fun main() {
 	if (!logDir.exists()) logDir.mkdirs()
 	if (!logDir.isDirectory()) logDir = File(".") // 如果无法创建目录logs, 那么不如把日志写到当前目录下
 
-	if (sh.isAlive()) {
-		sh.run(cmd)
-		if (sh.lastCode() == 0)
-			println("Shell进程(${ sh.pid })正在保护您的CPU")
-		else {
-			println("您的计算机可能不支持top命令")
-			sh.exit()
-			return
-		}
-	} else {
-		println("启动shell失败")
-		return
+	if (!sh.isAlive()) return println("启动shell失败")
+	sh.run(cmd) // 测试 top 命令
+	if (sh.lastCode() != 0) {
+		println("您的计算机可能不支持top命令")
+		return sh.exit()
 	}
+	println("Shell进程(${ sh.pid })正在保护您的CPU")
 
 /*
 	  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
