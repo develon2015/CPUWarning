@@ -5,7 +5,11 @@ import java.util.Date
 import java.io.File
 
 fun main() {
-	val sender = MailSender("zhangsan@develon.club", "pawd")
+	// 腾讯企业邮箱认账账号
+	val sender = MailSender("cpuwarning@githmb.com", "pawd")
+	// 邮件接收者
+	val sendto = "dest@example.com"
+
 	val sh = Shell()
 	val cmd = """top -bi -n 1"""
 	sh.ready()
@@ -89,7 +93,7 @@ fun main() {
 							// 发送邮件
 							println("发送邮件 -- (${ Date() })")
 							lastSendMailTime = crt
-							sender.sendWarning("dest@example.com", "CPU超负荷警告", "服务器CPU严重超载($avg%), 请管理员立即处理.\n$output\nFROM CPUWarning.")
+							sender.sendWarning(sendto, "CPU超负荷警告", "服务器CPU严重超载($avg%), 请管理员立即处理.\n$output\nFROM CPUWarning.")
 						} else {
 							println("距离上一次发送时间 ${ crt - lastSendMailTime }, 不发送邮件")
 						}
